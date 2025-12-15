@@ -30,3 +30,7 @@ Each node can perform the following actions (invoked by the user):
 
 After receiving the list of nodes from the server, each node knows the IP address of all other nodes and can contact them directly without going through the server.
 The resulting network topology is a complete graph with bidirectional edges.
+
+## Run
+
+To run the system, run the Server class once, then the Peer class for each peer that you want to have in the system. 
