@@ -1,6 +1,6 @@
-# Peer-to-peer backup
+# Fault tolerant backup system
 
-The project consists of implementing a distributed fault-tolerant system for backing up files.
+The project consists of implementing a prototype of a distributed fault-tolerant system for backing up files.
 Each node, in addition to accessing its own files, keeps a copy of the files of the other nodes, so if a node stops working, the backup is not lost because there will be several copies on the other nodes.
 
 ## Agents
