@@ -28,7 +28,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
         try {
             // Obtain peer IP address and generate unique name
             String IPAddress = RemoteServer.getClientHost();
-            String name = "backupsystem.agents.Peer-" + UUID.randomUUID().toString().substring(0, 11);
+            String name = "Peer-" + UUID.randomUUID().toString().substring(0, 11);
             // Add peer to the list
             peerList.add(name, IPAddress, peerStub);
             // Send updated list to each subscribed peer
@@ -38,21 +38,21 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
             // Return peer name to invoker
             return name;
         } catch (ServerNotActiveException e) {
-            throw new RuntimeException("backupsystem.agents.Server cannot determine peer IP address");
+            throw new RuntimeException("Server cannot determine peer IP address");
         } catch (DuplicateElementException e) {
-            throw new RuntimeException("backupsystem.agents.Peer already subscribed");
+            throw new RuntimeException("Peer already subscribed");
         }
     }
 
     @Override
-    public void unsubscribePeer(PeerInterface peerStub) throws RemoteException {
+    public synchronized void unsubscribePeer(PeerInterface peerStub) throws RemoteException {
         try {
             String name = peerList.remove(peerStub);
             sendUpdatedList();
-            System.out.println("backupsystem.agents.Peer unsubscribed: " + name);
+            System.out.println("Peer unsubscribed: " + name);
             printPeerList();
         } catch (NoSuchElementException e) {
-            throw new RuntimeException("backupsystem.agents.Peer not subscribed");
+            throw new RuntimeException("Peer not subscribed");
         }
     }
 
@@ -68,7 +68,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     }
 
     private void printPeerList() {
-        System.out.println("\nbackupsystem.agents.Peer list:");
+        System.out.println("\nPeer list:");
         for (PeerInfo p : peerList) {
             System.out.println(p.toString());
         }
@@ -81,21 +81,21 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
             System.out.println("RMI Registry created on port 1099");
 
             Server server = new Server();
-            rmiRegistry.rebind("backupsystem.agents.Server", server);
-            System.out.println("backupsystem.agents.Server bound to registry as 'backupsystem.agents.Server'");
+            rmiRegistry.rebind("Server", server);
+            System.out.println("Server bound to registry as 'Server'");
         } catch (RemoteException e) {
-            System.err.println("Error in creating registry or backupsystem.agents.Server binding");
+            System.err.println("Error in creating registry or Server binding");
             throw new RuntimeException(e);
         }
 
-        System.out.println("backupsystem.agents.Server is ready ...\n");
+        System.out.println("Server is ready ...\n");
 
 
         synchronized (Server.class) {
             try {
                 Server.class.wait();
             } catch (InterruptedException e) {
-                System.out.println("backupsystem.agents.Server interrupted. Goodbye.");
+                System.out.println("Server interrupted. Goodbye.");
             }
         }
     }

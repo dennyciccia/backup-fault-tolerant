@@ -105,7 +105,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
      */
 
     private void subscribeToServer(String serverIP) throws MalformedURLException, NotBoundException, RemoteException {
-        ServerInterface stub = (ServerInterface) Naming.lookup("rmi://" + serverIP + "/backupsystem.agents.Server");
+        ServerInterface stub = (ServerInterface) Naming.lookup("rmi://" + serverIP + "/Server");
         String obtainedName = stub.subscribePeer(this);
         // if everything goes right
         serverStub = stub;
@@ -245,7 +245,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
     }
 
     private void showPeerList(PeerList peerListWithoutSelf) {
-        System.out.println("backupsystem.agents.Peer list:");
+        System.out.println("Peer list:");
         for (int i=0; i<peerListWithoutSelf.size(); i++) {
             System.out.println(i + ": " + peerListWithoutSelf.get(i).getName() + " (" + peerListWithoutSelf.get(i).getIPAddress() + ")");
         }
@@ -313,7 +313,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
                                 System.out.print("\n");
                                 for (int node : nodes)
                                     if (node < 0 || node >= peerListWithoutSelf.size())
-                                        throw new IndexOutOfBoundsException("backupsystem.agents.Peer IDs must be between 0 and " + (peerListWithoutSelf.size() - 1));
+                                        throw new IndexOutOfBoundsException("Peer IDs must be between 0 and " + (peerListWithoutSelf.size() - 1));
 
                                 // backup
                                 thisPeer.backup(file, nodes, peerListWithoutSelf);
@@ -331,7 +331,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
                             } catch (IOException e) {
                                 System.err.println("Error in backup: " + e.getMessage());
                             } catch (NumberFormatException e) {
-                                System.err.println("backupsystem.agents.Peer IDs must be integers: " + e.getMessage());
+                                System.err.println("Peer IDs must be integers: " + e.getMessage());
                             }
                         } else {
                             System.out.println("There are no peers on which backup");

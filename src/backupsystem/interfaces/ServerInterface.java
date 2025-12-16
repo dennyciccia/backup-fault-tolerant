@@ -7,6 +7,5 @@ import java.rmi.RemoteException;
 
 public interface ServerInterface extends Remote {
     String subscribePeer(PeerInterface callerStub) throws RemoteException;
-
     void unsubscribePeer(PeerInterface caller) throws RemoteException;
 }
