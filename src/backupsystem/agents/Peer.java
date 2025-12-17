@@ -7,9 +7,7 @@ import backupsystem.interfaces.ServerInterface;
 
 import java.io.*;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -18,7 +16,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class Peer extends UnicastRemoteObject implements PeerInterface {
-    private static final String FILE_DIR = "files";
+    private static final String ROOT_FILE_DIR = "files";
+    private static final String BACKUP_DIR = "backups";
+    private static final String LOCAL_FILES_DIR = "local_files";
 
     private PeerList peerList;
     private String name;
@@ -57,7 +57,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
     @Override
     public void backupFile(File file, byte[] fileData, PeerInterface owner) throws IOException {
         String ownerName = peerList.getElementByStub(owner).getName();
-        Path backupPath = Paths.get(FILE_DIR + File.separator + this.name + File.separator + "backups" + File.separator + ownerName + File.separator + file.getName());
+        Path backupPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR + File.separator + ownerName + File.separator + file.getName());
         Files.createDirectories(backupPath.getParent());
         Files.write(backupPath, fileData);
     }
@@ -66,7 +66,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
     @Override
     public AbstractMap.SimpleImmutableEntry<File,byte[]> getBackedUpFile(String fileName, PeerInterface owner) throws IOException {
         String ownerName = peerList.getElementByStub(owner).getName();
-        Path ownerFilePath = Paths.get(FILE_DIR + File.separator + this.name + File.separator + "backups" + File.separator + ownerName + File.separator + fileName);
+        Path ownerFilePath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR + File.separator + ownerName + File.separator + fileName);
         File fileDescriptor;
         byte[] fileData;
 
@@ -86,7 +86,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
     public String[] showBackedUpFiles(PeerInterface owner) throws IOException {
         String ownerName = peerList.getElementByStub(owner).getName();
         List<String> fileNames;
-        Path ownerBackupPath = Paths.get(FILE_DIR + File.separator + this.name + File.separator + "backups" + File.separator + ownerName);
+        Path ownerBackupPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR + File.separator + ownerName);
 
         // take all the file names in the owner's directory
         if (Files.isDirectory(ownerBackupPath)) {
@@ -118,7 +118,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
         serverStub.unsubscribePeer(this);
 
         // delete all backed up files of other peers
-        Path localBackupPath = Paths.get(FILE_DIR + File.separator + this.name + File.separator + "backups");
+        Path localBackupPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR);
         if (Files.exists(localBackupPath)) {
             try (var stream = Files.walk(localBackupPath)) {
                 //.sorted(Comparator.reverseOrder())
@@ -168,7 +168,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
 
         // write the most recent file
         if (latestFile != null) {
-            Path localFilesPath = Paths.get(FILE_DIR + File.separator + this.name + File.separator + "local_files" + File.separator + latestFile.getKey().getName());
+            Path localFilesPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + LOCAL_FILES_DIR + File.separator + latestFile.getKey().getName());
             Files.createDirectories(localFilesPath.getParent());
             Files.write(localFilesPath, latestFile.getValue());
         } else {
@@ -366,7 +366,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
 
                             // for each peer print its files
                             for (String key : peerWithFiles.keySet()) {
-                                System.out.println("• " + key + ":");
+                                System.out.println("- " + key + ":");
                                 for (String value : peerWithFiles.get(key)) {
                                     System.out.println("\t- " + value);
                                 }
