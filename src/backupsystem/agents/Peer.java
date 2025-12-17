@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public class Peer extends UnicastRemoteObject implements PeerInterface {
     private static final String ROOT_FILE_DIR = "files";
-    private static final String BACKUP_DIR = "backups";
+    private static final String BACKUP_DIR = "backups_of_other_peers";
     private static final String LOCAL_FILES_DIR = "local_files";
 
     private PeerList peerList;
@@ -119,6 +119,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
 
         // delete all backed up files of other peers
         Path localBackupPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR);
+
         if (Files.exists(localBackupPath)) {
             try (var stream = Files.walk(localBackupPath)) {
                 //.sorted(Comparator.reverseOrder())

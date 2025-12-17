@@ -70,7 +70,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private void printPeerList() {
         System.out.println("\nPeer list:");
         for (PeerInfo p : peerList) {
-            System.out.println(p.toString());
+            System.out.println("- " + p.toString());
         }
         System.out.print("\n");
     }
