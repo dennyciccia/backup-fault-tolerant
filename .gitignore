@@ -4,6 +4,7 @@ out/
 !**/src/test/**/out/
 .idea
 Backup Fault Tolerant.iml
+docs
 
 ### Eclipse ###
 .apt_generated
