@@ -75,6 +75,18 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
         System.out.print("\n");
     }
 
+    private void checkIfPeersAreAlive() throws RemoteException {
+        System.out.println("Checking if peers are alive ...\n");
+        for (int i = peerList.size() - 1; i >= 0; i--) {
+            try {
+                peerList.get(i).getStub().checkAlive();
+            } catch (Exception e) {
+                System.out.println("Peer " + peerList.get(i).getName() + " is not alive, unsubscribing ...");
+                unsubscribePeer(peerList.get(i).getStub());
+            }
+        }
+    }
+
     public static void main() {
         try {
             Registry rmiRegistry = LocateRegistry.createRegistry(1099);

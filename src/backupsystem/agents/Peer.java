@@ -100,6 +100,10 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
         return fileNames.toArray(new String[0]);
     }
 
+    // invoked by server to check if peer is alive
+    @Override
+    public void checkAlive() throws RemoteException {}
+
     /*
      * ----------- Local methods -----------
      */

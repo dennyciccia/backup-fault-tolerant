@@ -15,4 +15,5 @@ public interface PeerInterface extends Remote {
     void backupFile(File file, byte[] fileData, PeerInterface owner) throws IOException;
     AbstractMap.SimpleImmutableEntry<File,byte[]> getBackedUpFile(String fileName, PeerInterface owner) throws IOException;
     String[] showBackedUpFiles(PeerInterface owner) throws IOException;
+    void checkAlive() throws RemoteException;
 }
