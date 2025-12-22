@@ -12,6 +12,8 @@ It has a list of peers with their names, IP addresses, and other useful metadata
 The server provides the list of peers to new peers that want to register on the network.
 When a peer is added or removed from the network, the server sends the updated list to all registered peers.
 
+The central server also checks periodically if subscribed peers are alive, if one of them is not alive then it is unsubscribed from the network.
+
 ### Peer node
 
 Each peer has a list of peers, which is provided by the server every time a new peer subscribes or unsubscribes from the network.
