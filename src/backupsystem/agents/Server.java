@@ -84,7 +84,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private void printPeerList() {
         System.out.println("\nPeer list:");
         for (PeerInfo p : peerList) {
-            System.out.println("- " + p.toString());
+            System.out.println("- " + p.getName() + ": " + p.getIPAddress());
         }
         System.out.print("\n");
     }
@@ -115,7 +115,6 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
         }
 
         System.out.println("Server is ready ...\n");
-
 
         synchronized (Server.class) {
             try {
