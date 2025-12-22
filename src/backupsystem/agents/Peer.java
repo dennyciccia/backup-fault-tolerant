@@ -2,6 +2,7 @@ package backupsystem.agents;
 
 import backupsystem.datastructures.PeerInfo;
 import backupsystem.datastructures.PeerList;
+import backupsystem.exceptions.CallerNotSubscribedException;
 import backupsystem.interfaces.PeerInterface;
 import backupsystem.interfaces.ServerInterface;
 
@@ -36,11 +37,15 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
     }
 
     /*
-     * ----------- Getters -----------
+     * ----------- Getters and setters -----------
      */
 
     public boolean isSubscribed() {
         return subscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        this.subscribed = subscribed;
     }
 
     /*
@@ -55,7 +60,9 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
 
     // invoked by a peer, stores received file as owner's property
     @Override
-    public void backupFile(File file, byte[] fileData, PeerInterface owner) throws IOException {
+    public void backupFile(File file, byte[] fileData, PeerInterface owner) throws IOException, CallerNotSubscribedException {
+        checkIfCallerIsSubscribed(owner);
+
         String ownerName = peerList.getElementByStub(owner).getName();
         Path backupPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR + File.separator + ownerName + File.separator + file.getName());
         Files.createDirectories(backupPath.getParent());
@@ -64,7 +71,9 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
 
     // invoked by a peer, returns owner's specified file
     @Override
-    public AbstractMap.SimpleImmutableEntry<File,byte[]> getBackedUpFile(String fileName, PeerInterface owner) throws IOException {
+    public AbstractMap.SimpleImmutableEntry<File,byte[]> getBackedUpFile(String fileName, PeerInterface owner) throws IOException, CallerNotSubscribedException {
+        checkIfCallerIsSubscribed(owner);
+
         String ownerName = peerList.getElementByStub(owner).getName();
         Path ownerFilePath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR + File.separator + ownerName + File.separator + fileName);
         File fileDescriptor;
@@ -83,7 +92,9 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
 
     // invoked by a peer, returns the list of the owner's stored file names
     @Override
-    public String[] showBackedUpFiles(PeerInterface owner) throws IOException {
+    public String[] showBackedUpFiles(PeerInterface owner) throws IOException, CallerNotSubscribedException {
+        checkIfCallerIsSubscribed(owner);
+
         String ownerName = peerList.getElementByStub(owner).getName();
         List<String> fileNames;
         Path ownerBackupPath = Paths.get(ROOT_FILE_DIR + File.separator + this.name + File.separator + BACKUP_DIR + File.separator + ownerName);
@@ -140,7 +151,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
         subscribed = false;
     }
 
-    private void backup(File file, int[] nodes, PeerList peerListWithoutSelf) throws IOException {
+    private void backup(File file, int[] nodes, PeerList peerListWithoutSelf) throws IOException, CallerNotSubscribedException {
         // read file
         byte[] fileData = readFileFromDisk(file);
 
@@ -151,7 +162,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
         }
     }
 
-    private void recoverFile(String fileName) throws IOException {
+    private void recoverFile(String fileName) throws IOException, CallerNotSubscribedException {
         PeerList peerListWithoutSelf = getPeerListWithoutSelf();
         List<AbstractMap.SimpleImmutableEntry<File,byte[]>> filesFormPeers = new ArrayList<>();
 
@@ -181,7 +192,7 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
         }
     }
 
-    private Map<String,String[]> retrieveBackedUpFilesList() throws IOException {
+    private Map<String,String[]> retrieveBackedUpFilesList() throws IOException, CallerNotSubscribedException {
         PeerList peerListWithoutSelf = getPeerListWithoutSelf();
         Map<String,String[]> peerWithFiles = new HashMap<>();
 
@@ -276,6 +287,12 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
         return fileData;
     }
 
+    private void checkIfCallerIsSubscribed(PeerInterface caller) throws CallerNotSubscribedException {
+        if (!peerList.stubInList(caller)){
+            throw new CallerNotSubscribedException("Calling peer is not subscribed");
+        }
+    }
+
     /*
      * ----------- Main -----------
      */
@@ -337,6 +354,9 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
                                 System.err.println("Error in backup: " + e.getMessage());
                             } catch (NumberFormatException e) {
                                 System.err.println("Peer IDs must be integers: " + e.getMessage());
+                            } catch (CallerNotSubscribedException e) {
+                                System.err.println("Peer is not subscribed");
+                                thisPeer.setSubscribed(false);
                             }
                         } else {
                             System.out.println("There are no peers on which backup");
@@ -357,6 +377,9 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
                             System.out.println("File recovered");
                         } catch (IOException e) {
                             System.err.println("Error in recovering file: " + e.getMessage());
+                        } catch (CallerNotSubscribedException e) {
+                            System.err.println("Peer is not subscribed");
+                            thisPeer.setSubscribed(false);
                         }
                     }
                     break;
@@ -378,6 +401,9 @@ public class Peer extends UnicastRemoteObject implements PeerInterface {
                             }
                         } catch (IOException e) {
                             System.err.println("Error in retrieving list of backed up files: " + e.getMessage());
+                        } catch (CallerNotSubscribedException e) {
+                            System.err.println("Peer is not subscribed");
+                            thisPeer.setSubscribed(false);
                         }
                     }
                     break;

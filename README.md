@@ -28,6 +28,8 @@ Each peer can perform the following actions (invoked by the user):
 - Viewing backup status: shows which peers have copies of the requesting peer's files by making direct requests to the peers.
 - Unsubscribing from the network: the peer deletes all backups of files from other peers that it has and notifies the server of the unsubscription.
 
+Each time that a peer calls another peer, the callee checks if the caller is subscribed, if it is not then the callee notifies the caller.
+
 ## Network operation
 
 After receiving the list of peers from the server, each peer knows the IP address of all other peers and can contact them directly without going through the server.
