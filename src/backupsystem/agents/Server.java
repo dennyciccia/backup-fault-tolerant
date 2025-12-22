@@ -14,6 +14,9 @@ import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Server extends UnicastRemoteObject implements ServerInterface {
     private final PeerList peerList;
@@ -21,6 +24,17 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     public Server() throws RemoteException {
         super();
         this.peerList = new PeerList();
+
+        // Execute herthbeat thread
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                checkIfPeersAreAlive();
+            } catch (Exception e) {
+                System.err.println("Error in scheduling hearthbeat: " + e.getMessage());
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     @Override
